@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的個人網站</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #0070f3;
+            --primary-hover: #0051a8;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* 個人簡介卡片 */
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin: 0 auto 16px;
+            background-image: url('https://picsum.photos/200'); /* 隨機產生一張頭像，可替換 */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .profile-card h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+        }
+
+        .profile-card p {
+            color: #666;
+            margin: 0 0 20px 0;
+            font-size: 16px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        /* PO 文區塊 */
+        .post-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .post-box h2 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            float: right;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* 動態貼文列表 */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .post-content {
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="avatar"></div>
+            <h1>你的名字</h1>
+            <p>👋 哈囉！這是我用 Cloudflare 託管的個人網站。在這裡你可以看到我的動態！</p>
+            <div class="social-links">
+                <a href="#" class="btn" target="_blank">GitHub</a>
+                <a href="#" class="btn" target="_blank">Threads</a>
+                <a href="mailto:your-email@example.com" class="btn">聯絡我</a>
+            </div>
+        </div>
+
+        <div class="post-box">
+            <h2>發佈新動態</h2>
+            <textarea id="postInput" placeholder="今天想分享什麼..." maxlength="280"></textarea>
+            <div class="clearfix">
+                <button class="submit-btn" onclick="publishPost()">發佈 PO 文</button>
+            </div>
+        </div>
+
+        <div class="feed" id="feedContainer">
+            <div class="post-card">
+                <div class="post-time">2026-07-10 10:00</div>
+                <div class="post-content">歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化：從瀏覽器的 LocalStorage 讀取以前儲存的貼文
+        window.onload = function() {
+            loadPosts();
+        };
+
+        function publishPost() {
+            const textarea = document.getElementById('postInput');
+            const content = textarea.value.trim();
+
+            if (content === "") {
+                alert("請輸入內容再發佈喔！");
+                return;
+            }
+
+            // 取得目前時間
+            const now = new Date();
+            const timeString = now.getFullYear() + '-' + 
+                               String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(now.getDate()).padStart(2, '0') + ' ' + 
+                               String(now.getHours()).padStart(2, '0') + ':' + 
+                               String(now.getMinutes()).padStart(2, '0');
+
+            const newPost = {
+                id: Date.now(),
+                time: timeString,
+                content: content
+            };
+
+            // 儲存到 LocalStorage
+            let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
+            posts.unshift(newPost); // 將新貼文排在最前面
+            localStorage.setItem('my_posts', JSON.stringify(posts));
+
+            // 清空輸入框並重新渲染列表
+            textarea.value = "";
+            loadPosts();
+        }
+
+        function loadPosts() {
+            const feedContainer = document.getElementById('feedContainer');
+            // 保留預設的第一條貼文
+            const defaultPost = `
+                <div class="post-card">
+                    <div class="post-time">2026-07-10 10:00</div>
+                    <div class="post-content">歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
+                </div>
+            `;
+            
+            let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
+            let postsHTML = '';
+
+            posts.forEach(post => {
+                // 防止 XSS 注入攻擊
+                const safeContent = post.content
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+
+                postsHTML += `
+                    <div class="post-card">
+                        <div class="post-time">${post.time}</div>
+                        <div class="post-content">${safeContent}</div>
+                    </div>
+                `;
+            });
+
+            feedContainer.innerHTML = postsHTML + defaultPost;
+        }
+    </script>
+</body>
+</html>
