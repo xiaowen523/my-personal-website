@@ -239,7 +239,7 @@
     </div>
 
    <script>
-    // 記得填入你複製的 Google 網頁應用程式網址
+    // 貼上你剛剛最新複製的 Google 網頁應用程式網址
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwSywtd7wze_0QvP0uYjv3q3Pu0X55jMINVDJXXChkaupK23A6A7YhB9F0Co09_M3C2mw/exec"; 
 
     window.onload = function() {
@@ -259,9 +259,9 @@
       let finalContent = content;
       let isSysop = false;
 
-      if (password === 'asdfghjk') { // 密碼自訂
+      if (password === 'admin67') { // 密碼自訂
         isSysop = true;
-        finalContent = "👑 [Haowen Fu] " + content;
+        finalContent = "👑 [HaowenFu] " + content;
       } else if (password !== null && password !== "") {
         alert("密碼錯誤！將以訪客身份留言。");
         finalContent = "💬 [訪客留言] " + content;
@@ -283,18 +283,17 @@
         role: isSysop ? 'admin' : 'user'
       };
 
-      // 畫面上先立刻顯示文章，讓體驗順暢
+      // 畫面上先立刻顯示文章
       prependPostToFeed(newPost);
       textarea.value = "";
 
-      // 改用 100% 不會被瀏覽器安全機制卡住的 JSONP 方式上傳資料
+      // 透過 JSONP 方式背景發送給 Google
       const script = document.createElement('script');
       script.src = `${GAS_URL}?action=publish&callback=onPublishSuccess&data=${encodeURIComponent(JSON.stringify(newPost))}`;
       document.body.appendChild(script);
-      document.body.removeChild(script); // 觸發後即刻移除，保持網頁乾淨
+      document.body.removeChild(script);
     }
 
-    // 發文成功後的後台回呼邏輯
     function onPublishSuccess(result) {
       if (result.status !== "success") {
         console.error("雲端備份失敗:", result.message);
@@ -322,7 +321,6 @@
     }
 
     function loadPosts() {
-      // 讀取也改用最穩定的 JSONP 機制
       window.onLoadPostsSuccess = function(posts) {
         const feedContainer = document.getElementById('feedContainer');
         const defaultPost = `
