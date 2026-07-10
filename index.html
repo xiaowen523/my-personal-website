@@ -239,124 +239,118 @@
     </div>
 
     <script>
-        wwindow.onload = function() {
-    loadPosts();
-};
+    // 這裡放你從 Google Apps Script 複製的網頁應用程式網址 (前後的雙引號要保留)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyKuNrXmlxNObpnkuqNNKSSXjb2ulTVQIhvcsNc-M-HIJg1Yw_ZE3loqhktKH4gv766Jg/exec"; 
 
-function publishPost() {
-    const textarea = document.getElementById('postInput');
-    const content = textarea.value.trim();
+    window.onload = function() {
+      loadPosts();
+    };
 
-    if (content === "") {
+    function publishPost() {
+      const textarea = document.getElementById('postInput');
+      const content = textarea.value.trim();
+
+      if (content === "") {
         alert("請輸入內容再發佈喔！");
         return;
-    }
+      }
 
-    // 1. 彈出視窗詢問是不是 Sysop 管理員
-    const password = prompt("請輸入 Sysop 發文密碼（留空或選取消則以訪客身份留言）：");
-    
-    let finalContent = content;
-    let isSysop = false;
+      // 密碼驗證邏輯
+      const password = prompt("請輸入 Sysop 發文密碼（留空或選取消則以訪客身份留言）：");
+      
+      let finalContent = content;
+      let isSysop = false;
 
-    // 2. 設定你的專屬密碼 (這裡自訂，例如我設定 'myadmin123')
-    if (password === 'admin67') {
+      if (password === 'haowen0523') { // 這裡可以自訂你的發文密碼
         isSysop = true;
         finalContent = "👑 [Haowen Fu] " + content;
-    } else if (password !== null && password !== "") {
-        // 輸入錯密碼的提示
+      } else if (password !== null && password !== "") {
         alert("密碼錯誤！將以訪客身份留言。");
         finalContent = "💬 [訪客留言] " + content;
-    } else {
-        // 沒輸入或按取消，直接當作訪客
+      } else {
         finalContent = "💬 [訪客留言] " + content;
-    }
+      }
 
-    const now = new Date();
-    const timeString = now.getFullYear() + '-' + 
-                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                       String(now.getDate()).padStart(2, '0') + ' ' + 
-                       String(now.getHours()).padStart(2, '0') + ':' + 
-                       String(now.getMinutes()).padStart(2, '0');
+      const now = new Date();
+      const timeString = now.getFullYear() + '-' + 
+                         String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(now.getDate()).padStart(2, '0') + ' ' + 
+                         String(now.getHours()).padStart(2, '0') + ':' + 
+                         String(now.getMinutes()).padStart(2, '0');
 
-    const newPost = {
+      const newPost = {
         id: Date.now(),
         time: timeString,
         content: finalContent,
         role: isSysop ? 'admin' : 'user'
-    };
+      };
 
-    let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
-    posts.unshift(newPost);
-    localStorage.setItem('my_posts', JSON.stringify(posts));
+      // 提示使用者正在上傳到 Google 雲端
+      textarea.disabled = true;
+      textarea.placeholder = "正在同步至 Google 雲端硬碟...";
 
-    textarea.value = "";
-    loadPosts();
-}
+      // 發送請求給 Google Apps Script
+      fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newPost)
+      })
+      .then(() => {
+        textarea.disabled = false;
+        textarea.value = "";
+        textarea.placeholder = "今天想分享什麼...";
+        // 延遲一秒重新載入，給 Google 一點時間寫入檔案
+        setTimeout(loadPosts, 1000); 
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("雲端同步失敗，請檢查網路。");
+        textarea.disabled = false;
+        textarea.placeholder = "今天想分享什麼...";
+      });
+    }
 
-function loadPosts() {
-    const feedContainer = document.getElementById('feedContainer');
-    const defaultPost = `
+    function loadPosts() {
+      const feedContainer = document.getElementById('feedContainer');
+      const defaultPost = `
         <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
-            <div class="post-time">6767-67-67 67:67 PM</div>
-            <div class="post-content">👑 [Sysop 公告] 歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
+          <div class="post-time">2026-07-10 10:00</div>
+          <div class="post-content">👑 [Sysop 公告] 歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
         </div>
-    `;
-    
-    let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
-    let postsHTML = '';
+      `;
 
-    posts.forEach(post => {
-        const safeContent = post.content
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+      // 讀取 Google 雲端硬碟的 json 檔案
+      fetch(GAS_URL)
+        .then(response => response.json())
+        .then(posts => {
+          let postsHTML = '';
+          posts.forEach(post => {
+            const safeContent = post.content
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
 
-        // 如果是管理員發的文，可以給它一點特別的樣式（例如字體加粗）
-        const styleClass = post.role === 'admin' ? 'style="font-weight: 600;"' : '';
+            const styleClass = post.role === 'admin' ? 'style="font-weight: 600;"' : '';
 
-        postsHTML += `
-            <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+            postsHTML += `
+              <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
                 <div class="post-time">${post.time}</div>
                 <div class="post-content" ${styleClass}>${safeContent}</div>
-            </div>
-        `;
-    });
-
-    feedContainer.innerHTML = postsHTML + defaultPost;
-}
-
-        function loadPosts() {
-            const feedContainer = document.getElementById('feedContainer');
-            const defaultPost = `
-                <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
-                    <div class="post-time">2026-07-10 10:00</div>
-                    <div class="post-content">歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
-                </div>
+              </div>
             `;
-            
-            let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
-            let postsHTML = '';
-
-            posts.forEach(post => {
-                const safeContent = post.content
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-
-                postsHTML += `
-                    <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
-                        <div class="post-time">${post.time}</div>
-                        <div class="post-content">${safeContent}</div>
-                    </div>
-                `;
-            });
-
-            feedContainer.innerHTML = postsHTML + defaultPost;
-        }
-    </script>
+          });
+          feedContainer.innerHTML = postsHTML + defaultPost;
+        })
+        .catch(error => {
+          console.error("Error loading posts:", error);
+          feedContainer.innerHTML = defaultPost;
+        });
+    }
+  </script>
 </body>
 </html>
