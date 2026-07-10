@@ -262,6 +262,9 @@ function publishPost() {
     if (password === 'admin67') {
         isSysop = true;
         finalContent = "👑 [Sysop 公告] " + content;
+    } else if (password === 'haowen67'{
+         isSysop = true;
+         finalContact = "💬 [Haowen Fu]" + contact;
     } else if (password !== null && password !== "") {
         // 輸入錯密碼的提示
         alert("密碼錯誤！將以訪客身份留言。");
