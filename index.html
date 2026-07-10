@@ -239,39 +239,93 @@
     </div>
 
     <script>
-        window.onload = function() {
-            loadPosts();
-        };
+        wwindow.onload = function() {
+    loadPosts();
+};
 
-        function publishPost() {
-            const textarea = document.getElementById('postInput');
-            const content = textarea.value.trim();
+function publishPost() {
+    const textarea = document.getElementById('postInput');
+    const content = textarea.value.trim();
 
-            if (content === "") {
-                alert("請輸入內容再發佈喔！");
-                return;
-            }
+    if (content === "") {
+        alert("請輸入內容再發佈喔！");
+        return;
+    }
 
-            const now = new Date();
-            const timeString = now.getFullYear() + '-' + 
-                               String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                               String(now.getDate()).padStart(2, '0') + ' ' + 
-                               String(now.getHours()).padStart(2, '0') + ':' + 
-                               String(now.getMinutes()).padStart(2, '0');
+    // 1. 彈出視窗詢問是不是 Sysop 管理員
+    const password = prompt("請輸入 Sysop 發文密碼（留空或選取消則以訪客身份留言）：");
+    
+    let finalContent = content;
+    let isSysop = false;
 
-            const newPost = {
-                id: Date.now(),
-                time: timeString,
-                content: content
-            };
+    // 2. 設定你的專屬密碼 (這裡自訂，例如我設定 'myadmin123')
+    if (password === 'admin67') {
+        isSysop = true;
+        finalContent = "👑 [Sysop 公告] " + content;
+    } else if (password !== null && password !== "") {
+        // 輸入錯密碼的提示
+        alert("密碼錯誤！將以訪客身份留言。");
+        finalContent = "💬 [訪客留言] " + content;
+    } else {
+        // 沒輸入或按取消，直接當作訪客
+        finalContent = "💬 [訪客留言] " + content;
+    }
 
-            let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
-            posts.unshift(newPost);
-            localStorage.setItem('my_posts', JSON.stringify(posts));
+    const now = new Date();
+    const timeString = now.getFullYear() + '-' + 
+                       String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(now.getDate()).padStart(2, '0') + ' ' + 
+                       String(now.getHours()).padStart(2, '0') + ':' + 
+                       String(now.getMinutes()).padStart(2, '0');
 
-            textarea.value = "";
-            loadPosts();
-        }
+    const newPost = {
+        id: Date.now(),
+        time: timeString,
+        content: finalContent,
+        role: isSysop ? 'admin' : 'user'
+    };
+
+    let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
+    posts.unshift(newPost);
+    localStorage.setItem('my_posts', JSON.stringify(posts));
+
+    textarea.value = "";
+    loadPosts();
+}
+
+function loadPosts() {
+    const feedContainer = document.getElementById('feedContainer');
+    const defaultPost = `
+        <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+            <div class="post-time">2026-07-10 10:00</div>
+            <div class="post-content">👑 [Sysop 公告] 歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
+        </div>
+    `;
+    
+    let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
+    let postsHTML = '';
+
+    posts.forEach(post => {
+        const safeContent = post.content
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+        // 如果是管理員發的文，可以給它一點特別的樣式（例如字體加粗）
+        const styleClass = post.role === 'admin' ? 'style="font-weight: 600;"' : '';
+
+        postsHTML += `
+            <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+                <div class="post-time">${post.time}</div>
+                <div class="post-content" ${styleClass}>${safeContent}</div>
+            </div>
+        `;
+    });
+
+    feedContainer.innerHTML = postsHTML + defaultPost;
+}
 
         function loadPosts() {
             const feedContainer = document.getElementById('feedContainer');
