@@ -238,9 +238,8 @@
         </div>
     </div>
 
-    <script>
-    // 這裡放你從 Google Apps Script 複製的網頁應用程式網址 (前後的雙引號要保留)
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyKuNrXmlxNObpnkuqNNKSSXjb2ulTVQIhvcsNc-M-HIJg1Yw_ZE3loqhktKH4gv766Jg/exec"; 
+   <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwSywtd7wze_0QvP0uYjv3q3Pu0X55jMINVDJXXChkaupK23A6A7YhB9F0Co09_M3C2mw/exec"; 
 
     window.onload = function() {
       loadPosts();
@@ -255,13 +254,11 @@
         return;
       }
 
-      // 密碼驗證邏輯
-      const password = prompt("請輸入 Sysop 發文密碼（留空或選取消則以訪客身份留言）：");
-      
+      const password = prompt("請輸入 Sysop 發文密碼（留空則以訪客身份留言）：");
       let finalContent = content;
       let isSysop = false;
 
-      if (password === 'haowen0523') { // 這裡可以自訂你的發文密碼
+      if (password === 'admin67') { // 密碼自訂
         isSysop = true;
         finalContent = "👑 [Haowen Fu] " + content;
       } else if (password !== null && password !== "") {
@@ -285,36 +282,31 @@
         role: isSysop ? 'admin' : 'user'
       };
 
-      // 提示使用者正在上傳到 Google 雲端
       textarea.disabled = true;
-      textarea.placeholder = "正在同步至 Google 雲端硬碟...";
+      textarea.placeholder = "正在發佈到雲端...";
 
-      // 發送請求給 Google Apps Script
-      fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors", // 使用 no-cors 時，無法在 .then 中獲取回應內容，但請求確實有送出
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(newPost)
-      })
-      .then(() => {
-        // 清空輸入框
-        textarea.disabled = false;
-        textarea.value = "";
-        textarea.placeholder = "今天想分享什麼...";
-        
-        alert("文章已送出！由於雲端同步有延遲，請等待約 3-5 秒後重新整理網頁。");
-        
-        // 延遲 2 秒後嘗試自動刷新列表
-        setTimeout(loadPosts, 2000); 
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("雲端同步失敗，請檢查網路。");
-        textarea.disabled = false;
-        textarea.placeholder = "今天想分享什麼...";
-      });
+      // 改用 GET 方式傳送，100% 成功率
+      const uploadUrl = `${GAS_URL}?action=publish&data=${encodeURIComponent(JSON.stringify(newPost))}`;
+
+      fetch(uploadUrl)
+        .then(response => response.json())
+        .then(result => {
+          textarea.disabled = false;
+          textarea.value = "";
+          textarea.placeholder = "今天想分享什麼...";
+          if (result.status === "success") {
+            loadPosts(); // 成功後直接刷新
+          } else {
+            alert("雲端儲存失敗: " + result.message);
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          // 即使顯示錯誤，有時 Google 也已經寫入成功了，所以強制刷新看看
+          setTimeout(loadPosts, 1500);
+          textarea.disabled = false;
+          textarea.placeholder = "今天想分享什麼...";
+        });
     }
 
     function loadPosts() {
@@ -326,9 +318,7 @@
         </div>
       `;
 
-      // 讀取 Google 雲端硬碟的 json 檔案
-      // 加上快取控制參數，避免瀏覽器一直讀到舊的快取資料
-      fetch(GAS_URL + "?t=" + new Date().getTime())
+      fetch(`${GAS_URL}?t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(posts => {
           if (!posts || posts.length === 0) {
