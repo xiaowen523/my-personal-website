@@ -6,17 +6,21 @@
     <title>Haowen's Web</title>
     <style>
         :root {
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --primary-color: #0070f3;
-            --primary-hover: #0051a8;
-            --border-color: #e2e8f0;
+            /* Apple Liquid Glass 風格核心變數 */
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            --text-color: #1d1d1f; /* Apple 專用深灰 */
+            --primary-color: #0071e3; /* Apple 專用藍 */
+            --primary-hover: #0077ed;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
+            /* 絢麗的動態流體背景，最能襯托玻璃質感 */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             color: var(--text-color);
             margin: 0;
             padding: 0;
@@ -24,6 +28,13 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .container {
@@ -33,36 +44,55 @@
             box-sizing: border-box;
         }
 
-        /* 個人簡介卡片 */
-        .profile-card {
-            background: var(--card-bg);
-            border-radius: 16px;
+        /* Apple Liquid Glass 核心樣式 */
+        .glass-panel {
+            background: var(--glass-bg);
+            /* 磨砂玻璃特效 */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); 
+            border-radius: 24px; /* 更圓潤的 Apple 邊角 */
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
             padding: 30px;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             margin-bottom: 24px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+        }
+
+        /* 個人簡介區 */
+        .profile-card {
+            text-align: center;
         }
 
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
-            background-color: #ccc;
             margin: 0 auto 16px;
-            background-image: url('https://picsum.photos/200'); /* 隨機產生一張頭像，可替換 */
+            background-image: url('https://picsum.photos/200'); 
             background-size: cover;
             background-position: center;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .profile-card h1 {
             margin: 0 0 8px 0;
-            font-size: 24px;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .profile-card p {
-            color: #666;
-            margin: 0 0 20px 0;
+            color: #333333;
+            margin: 0 0 24px 0;
             font-size: 16px;
+            line-height: 1.5;
         }
 
         .social-links {
@@ -71,70 +101,80 @@
             gap: 12px;
         }
 
+        /* Apple 風格按鈕 */
         .btn {
-            padding: 8px 16px;
+            padding: 10px 22px;
             border-radius: 20px;
-            border: 1px solid var(--border-color);
-            background: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             color: var(--text-color);
             text-decoration: none;
             font-size: 14px;
+            font-weight: 500;
             transition: all 0.2s ease;
         }
 
         .btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.6);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.03);
         }
 
         /* PO 文區塊 */
-        .post-box {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin-bottom: 24px;
-        }
-
         .post-box h2 {
             margin-top: 0;
             font-size: 18px;
-            margin-bottom: 12px;
+            font-weight: 600;
+            margin-bottom: 14px;
         }
 
         textarea {
             width: 100%;
-            height: 80px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            height: 90px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 14px;
             resize: none;
             box-sizing: border-box;
             font-family: inherit;
             font-size: 14px;
             margin-bottom: 12px;
             outline: none;
+            color: var(--text-color);
+            transition: all 0.2s;
+        }
+
+        textarea::placeholder {
+            color: #555;
         }
 
         textarea:focus {
+            background: rgba(255, 255, 255, 0.5);
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
         }
 
         .submit-btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 10px 24px;
+            border-radius: 18px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             float: right;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
         }
 
         .submit-btn:hover {
             background-color: var(--primary-hover);
+            box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
+            transform: translateY(-1px);
         }
 
         .clearfix::after {
@@ -150,18 +190,11 @@
             gap: 16px;
         }
 
-        .post-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
         .post-time {
             font-size: 12px;
-            color: #94a3b8;
+            color: #555555;
             margin-bottom: 8px;
+            font-weight: 500;
         }
 
         .post-content {
@@ -179,35 +212,32 @@
 <body>
 
     <div class="container">
-        <div class="profile-card">
+        <div class="glass-panel profile-card">
             <div class="avatar"></div>
             <h1>Haowen Fu</h1>
             <p>👋 哈囉！這是我用 Cloudflare 託管的個人網站。在這裡你可以看到我的動態！</p>
             <div class="social-links">
-                <a href="#" class="btn" target="_blank">GitHub</a>
-                <a href="#" class="btn" target="_blank">Threads</a>
-                <a href="mailto:haowenfu0523@gmail.com" class="btn">聯絡我</a>
+                <a href="haowenfu0523@gmail.com" class="btn">聯絡我</a>
             </div>
         </div>
 
-        <div class="post-box">
+        <div class="glass-panel post-box">
             <h2>發佈新動態</h2>
             <textarea id="postInput" placeholder="今天想分享什麼..." maxlength="280"></textarea>
             <div class="clearfix">
-                <button class="submit-btn" onclick="publishPost()">發佈 PO 文</button>
+                <button class="submit-btn" onclick="publishPost()">PO文</button>
             </div>
         </div>
 
         <div class="feed" id="feedContainer">
-            <div class="post-card">
-                <div class="post-time">Jan 1, 1970 12:00AM</div>
+            <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+                <div class="post-time">2026-07-10 10:00</div>
                 <div class="post-content">歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
             </div>
         </div>
     </div>
 
     <script>
-        // 初始化：從瀏覽器的 LocalStorage 讀取以前儲存的貼文
         window.onload = function() {
             loadPosts();
         };
@@ -221,7 +251,6 @@
                 return;
             }
 
-            // 取得目前時間
             const now = new Date();
             const timeString = now.getFullYear() + '-' + 
                                String(now.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -235,21 +264,18 @@
                 content: content
             };
 
-            // 儲存到 LocalStorage
             let posts = JSON.parse(localStorage.getItem('my_posts')) || [];
-            posts.unshift(newPost); // 將新貼文排在最前面
+            posts.unshift(newPost);
             localStorage.setItem('my_posts', JSON.stringify(posts));
 
-            // 清空輸入框並重新渲染列表
             textarea.value = "";
             loadPosts();
         }
 
         function loadPosts() {
             const feedContainer = document.getElementById('feedContainer');
-            // 保留預設的第一條貼文
             const defaultPost = `
-                <div class="post-card">
+                <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
                     <div class="post-time">2026-07-10 10:00</div>
                     <div class="post-content">歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
                 </div>
@@ -259,7 +285,6 @@
             let postsHTML = '';
 
             posts.forEach(post => {
-                // 防止 XSS 注入攻擊
                 const safeContent = post.content
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
@@ -268,7 +293,7 @@
                     .replace(/'/g, "&#039;");
 
                 postsHTML += `
-                    <div class="post-card">
+                    <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
                         <div class="post-time">${post.time}</div>
                         <div class="post-content">${safeContent}</div>
                     </div>
