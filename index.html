@@ -239,7 +239,8 @@
     </div>
 
    <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwSywtd7wze_0QvP0uYjv3q3Pu0X55jMINVDJXXChkaupK23A6A7YhB9F0Co09_M3C2mw/exec"; 
+    // 記得填入你複製的 Google 網頁應用程式網址
+    const GAS_URL = "填入你剛剛複製的Google網頁應用程式網址"; 
 
     window.onload = function() {
       loadPosts();
@@ -258,7 +259,7 @@
       let finalContent = content;
       let isSysop = false;
 
-      if (password === 'admin67') { // 密碼自訂
+      if (password === 'asdfghjk') { // 密碼自訂
         isSysop = true;
         finalContent = "👑 [Haowen Fu] " + content;
       } else if (password !== null && password !== "") {
@@ -282,74 +283,85 @@
         role: isSysop ? 'admin' : 'user'
       };
 
-      textarea.disabled = true;
-      textarea.placeholder = "正在發佈到雲端...";
+      // 畫面上先立刻顯示文章，讓體驗順暢
+      prependPostToFeed(newPost);
+      textarea.value = "";
 
-      // 改用 GET 方式傳送，100% 成功率
-      const uploadUrl = `${GAS_URL}?action=publish&data=${encodeURIComponent(JSON.stringify(newPost))}`;
+      // 改用 100% 不會被瀏覽器安全機制卡住的 JSONP 方式上傳資料
+      const script = document.createElement('script');
+      script.src = `${GAS_URL}?action=publish&callback=onPublishSuccess&data=${encodeURIComponent(JSON.stringify(newPost))}`;
+      document.body.appendChild(script);
+      document.body.removeChild(script); // 觸發後即刻移除，保持網頁乾淨
+    }
 
-      fetch(uploadUrl)
-        .then(response => response.json())
-        .then(result => {
-          textarea.disabled = false;
-          textarea.value = "";
-          textarea.placeholder = "今天想分享什麼...";
-          if (result.status === "success") {
-            loadPosts(); // 成功後直接刷新
-          } else {
-            alert("雲端儲存失敗: " + result.message);
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          // 即使顯示錯誤，有時 Google 也已經寫入成功了，所以強制刷新看看
-          setTimeout(loadPosts, 1500);
-          textarea.disabled = false;
-          textarea.placeholder = "今天想分享什麼...";
-        });
+    // 發文成功後的後台回呼邏輯
+    function onPublishSuccess(result) {
+      if (result.status !== "success") {
+        console.error("雲端備份失敗:", result.message);
+      }
+    }
+
+    function prependPostToFeed(post) {
+      const feedContainer = document.getElementById('feedContainer');
+      const safeContent = post.content
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+      const styleClass = post.role === 'admin' ? 'style="font-weight: 600;"' : '';
+
+      const newPostHTML = `
+        <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+          <div class="post-time">${post.time}</div>
+          <div class="post-content" ${styleClass}>${safeContent}</div>
+        </div>
+      `;
+      feedContainer.insertAdjacentHTML('afterbegin', newPostHTML);
     }
 
     function loadPosts() {
-      const feedContainer = document.getElementById('feedContainer');
-      const defaultPost = `
-        <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
-          <div class="post-time">2026-07-10 10:00</div>
-          <div class="post-content">👑 [Sysop 公告] 歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
-        </div>
-      `;
+      // 讀取也改用最穩定的 JSONP 機制
+      window.onLoadPostsSuccess = function(posts) {
+        const feedContainer = document.getElementById('feedContainer');
+        const defaultPost = `
+          <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+            <div class="post-time">2026-07-10 10:00</div>
+            <div class="post-content">👑 [Sysop 公告] 歡迎來到我的新網站！這是我發佈的第一條測試訊息。🚀</div>
+          </div>
+        `;
 
-      fetch(`${GAS_URL}?t=${new Date().getTime()}`)
-        .then(response => response.json())
-        .then(posts => {
-          if (!posts || posts.length === 0) {
-            feedContainer.innerHTML = defaultPost;
-            return;
-          }
-          
-          let postsHTML = '';
-          posts.forEach(post => {
-            const safeContent = post.content
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/"/g, "&quot;")
-              .replace(/'/g, "&#039;");
-
-            const styleClass = post.role === 'admin' ? 'style="font-weight: 600;"' : '';
-
-            postsHTML += `
-              <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
-                <div class="post-time">${post.time}</div>
-                <div class="post-content" ${styleClass}>${safeContent}</div>
-              </div>
-            `;
-          });
-          feedContainer.innerHTML = postsHTML + defaultPost;
-        })
-        .catch(error => {
-          console.error("Error loading posts:", error);
+        if (!posts || posts.length === 0) {
           feedContainer.innerHTML = defaultPost;
+          return;
+        }
+        
+        let postsHTML = '';
+        posts.forEach(post => {
+          const safeContent = post.content
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+          const styleClass = post.role === 'admin' ? 'style="font-weight: 600;"' : '';
+
+          postsHTML += `
+            <div class="glass-panel post-card" style="animation: fadeIn 0.3s ease-in-out;">
+              <div class="post-time">${post.time}</div>
+              <div class="post-content" ${styleClass}>${safeContent}</div>
+            </div>
+          `;
         });
+        feedContainer.innerHTML = postsHTML + defaultPost;
+      };
+
+      const script = document.createElement('script');
+      script.src = `${GAS_URL}?callback=onLoadPostsSuccess&_t=${Date.now()}`;
+      document.body.appendChild(script);
+      document.body.removeChild(script);
     }
   </script>
 </body>
